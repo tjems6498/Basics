@@ -16,7 +16,7 @@ def plot_examples(images, bboxes=None):
     columns = 4
     rows = 5
 
-    for i in range(1, len(images)):
+    for i in range(1, len(images)+1):
         if bboxes is not None:
             img = visualize_bbox(images[i-1], bboxes[i-1], class_name='Elon')
         else:
