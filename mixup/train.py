@@ -11,8 +11,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-
+from tqdm import tqdm
 from mobilenet import MobileNet
+import pdb
 
 
 #
@@ -65,11 +66,11 @@ transform_test = transforms.Compose([
 
 trainset = datasets.CIFAR10(root='./data', train=True, download=True,
                             transform=transform_train)
-trainloader = DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=8)
+trainloader = DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=0)
 
 testset = datasets.CIFAR10(root='./data', train=False, download=False,
                             transform=transform_test)
-testloader = DataLoader(testset, batch_size=args.batch_size, shuffle=True, num_workers=8)
+testloader = DataLoader(testset, batch_size=args.batch_size, shuffle=True, num_workers=0)
 
 if args.resume:
     print('==> Resuming from checkpoint..')
@@ -134,7 +135,8 @@ def train(epoch):
     train_loss = 0
     correct = 0
     total = 0
-    for batch_idx, (inputs, targets) in enumerate(trainloader):
+    loop = tqdm(trainloader, leave=True)
+    for batch_idx, (inputs, targets) in enumerate(loop):
         if use_cuda:
             inputs, targets = inputs.cuda(), targets.cuda()
 
@@ -152,9 +154,7 @@ def train(epoch):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
-        print(f" train_loss:{train_loss / batch_idx+1}  |  accuracy:{ 100. * correct / total}")
-
+        loop.set_postfix(loss=train_loss / (batch_idx+1), accuracy=(100. * correct / total).item())
     return (train_loss / batch_idx, 100. * correct / total)
 
 
@@ -165,7 +165,8 @@ def test(epoch):
     correct = 0
     total = 0
     with torch.no_grad():
-        for batch_idx, (inputs, targets) in enumerate(testloader):
+        loop = tqdm(testloader, leave=True)
+        for batch_idx, (inputs, targets) in enumerate(loop):
             if use_cuda:
                 inputs, targets = inputs.cuda(), targets.cuda()
             inputs, targets = Variable(inputs, volatile=True), Variable(targets)
@@ -177,7 +178,7 @@ def test(epoch):
             total += targets.size(0)
             correct += predicted.eq(targets.data).cpu().sum()
 
-            print(f" test_loss:{test_loss / batch_idx+1}  |  accuracy:{100. * correct / total}")
+            loop.set_postfix(loss=test_loss / (batch_idx + 1), accuracy=(100. * correct / total).item())
 
         acc = 100. * correct / total
         if epoch == start_epoch + args.epoch - 1 or acc > best_acc:

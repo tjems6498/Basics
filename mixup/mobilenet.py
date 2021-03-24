@@ -45,8 +45,8 @@ class MobileNet(nn.Module):
         out = self.linear(out)
         return out
 
-if __name__ == '__main__':
-    net = MobileNet()
-    x = torch.randn((2,3,32,32))
-    y = net(x)
-    print(y.shape)
+# if __name__ == '__main__':
+#     net = MobileNet()
+#     x = torch.randn((2,3,32,32))
+#     y = net(x)
+#     print(y.shape)
