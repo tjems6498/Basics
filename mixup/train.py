@@ -11,7 +11,7 @@ import torch.optim as optim
 
 from tqdm import tqdm
 from mobilenet import MobileNet
-from utils import data_loader
+from utils import data_loader, mixup_criterion, mixup_data
 import pdb
 
 
@@ -78,26 +78,6 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer, factor=0.1, patience=5, verbose=True
 )
 
-
-def mixup_data(x, y, alpha=1.0, use_cuda=True):
-    if alpha > 0:
-        lam = np.random.beta(alpha, alpha)
-    else:
-        lam = 1
-
-    batch_size = x.size(0)
-    if use_cuda:
-        index = torch.randperm(batch_size).cuda()  # batch_size만큼의 random index 1차원 벡터\
-
-    else:
-        index = torch.randperm(batch_size)
-
-    mixed_x = lam * x + (1 - lam) * x[index, :]
-    y_a, y_b = y, y[index]
-    return mixed_x, y_a, y_b, lam
-
-def mixup_criterion(criterion, pred, y_a, y_b, lam):
-    return lam * criterion(pred, y_a) + (1-lam) * criterion(pred, y_b)
 
 
 def train(epoch):
