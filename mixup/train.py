@@ -51,7 +51,7 @@ if args.augment:
                              (0.2023, 0.1994, 0.2010))
     ])
 else:
-    transforms_train = transforms.Compose([
+    transform_train = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465),
                              (0.2023, 0.1994, 0.2010))
@@ -62,7 +62,7 @@ transform_test = transforms.Compose([
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
 ])
 
-trainset = datasets.CIFAR10(root='./data', train=True, download=False,
+trainset = datasets.CIFAR10(root='./data', train=True, download=True,
                             transform=transform_train)
 trainloader = DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=8)
 
