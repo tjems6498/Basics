@@ -8,11 +8,10 @@ from torch.autograd import Variable
 import torch.backends.cudnn as cudnn
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
-import torchvision.transforms as transforms
-import torchvision.datasets as datasets
+
 from tqdm import tqdm
 from mobilenet import MobileNet
+from utils import data_loader
 import pdb
 
 
@@ -42,35 +41,7 @@ if args.seed != 0:
     torch.manual_seed(args.seed)
 
 
-# Data
-print('==> Preparing data..')
-if args.augment:
-    transform_train = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465),
-                             (0.2023, 0.1994, 0.2010))
-    ])
-else:
-    transform_train = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465),
-                             (0.2023, 0.1994, 0.2010))
-    ])
 
-transform_test = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-])
-
-trainset = datasets.CIFAR10(root='./data', train=True, download=True,
-                            transform=transform_train)
-trainloader = DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=0)
-
-testset = datasets.CIFAR10(root='./data', train=False, download=False,
-                            transform=transform_test)
-testloader = DataLoader(testset, batch_size=args.batch_size, shuffle=True, num_workers=0)
 
 if args.resume:
     print('==> Resuming from checkpoint..')
@@ -191,14 +162,14 @@ def test(epoch):
 def checkpoint(acc, epoch):
     print('Saving..')
     state = {
-        'net':  net,
+        'net': net,
         'acc': acc,
         'epoch': epoch,
         'rng_state': torch.get_rng_state()
     }
     if not os.path.isdir('checkpoint'):
         os.mkdir('checkpoint')
-    torch.save(state, './checkpoint/ckpt.t7' + args.name + '_'
+    torch.save(net.state_dict(), './checkpoint/ckpt.t7' + args.name + '_'
                + str(args.seed))
 
 
@@ -207,6 +178,10 @@ if not os.path.exists(logname):
         logwriter = csv.writer(logfile, delimiter=',')
         logwriter.writerow(['epoch', 'train loss', 'reg loss', 'train acc',
                             'test loss', 'test acc'])
+
+
+
+trainloader, testloader = data_loader(args.batch_size)
 
 for epoch in range(start_epoch, args.epoch):
     train_loss, train_acc = train(epoch)
