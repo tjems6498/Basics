@@ -13,21 +13,21 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
 from mixup.mobilenet import MobileNet
-from mixup.utils import progress_bar
+
 
 parser = argparse.ArgumentParser(description="Pytorch CIFAR10 Training")
-parser.add_argument('--lr', defualt=0.1, type=float, help='learning rate')
+parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
 parser.add_argument('--resume', '-r', action='store_true')
-parser.add_argument('--model', defualt="mobilenet", type=str,
+parser.add_argument('--model', default="mobilenet", type=str,
                    help='model type (defualt: Mobilenet)')
 parser.add_argument('--name', default='0', type=str, help='name of run')
-parser.add_argument('--seed', defualt=0, type=int, help='random seed')
+parser.add_argument('--seed', default=0, type=int, help='random seed')
 parser.add_argument('--batch-size', default=128, type=int, help='batch size')
-parser.add_argument('--epoch', defualt=200, type=int, help='total epochs to run')
+parser.add_argument('--epoch', default=200, type=int, help='total epochs to run')
 parser.add_argument('--no-augment', dest='augment', action='store_false',
                     help='use standard augmentation (defualt: True)')
 parser.add_argument('--decay', default=1e-4, type=float, help='weight decay')
-parser.add_argument('--alpha', defualt=1., type=float,
+parser.add_argument('--alpha', default=1., type=float,
                     help='mixup interpolation coefficient (defualt: 1)')
 args = parser.parse_args()
 
@@ -153,10 +153,8 @@ def train(epoch):
         loss.backward()
         optimizer.step()
 
-        progress_bar(batch_idx, len(trainloader),
-                     'Loss: %.3f | Reg: %.5f | Acc: %.3f%% (%d/%d)'
-                     % (train_loss / (batch_idx + 1), reg_loss / (batch_idx + 1),
-                        100. * correct / total, correct, total))
+        print(f" train_loss:{train_loss / batch_idx}  |  accuracy:{ 100. * correct / total}")
+
     return (train_loss / batch_idx, reg_loss / batch_idx, 100. * correct / total)
 
 
@@ -179,10 +177,8 @@ def test(epoch):
             total += targets.size(0)
             correct += predicted.eq(targets.data).cpu().sum()
 
-            progress_bar(batch_idx, len(testloader),
-                         'Loss: %.3f | Acc: %.3f%% (%d/%d)'
-                         % (test_loss / (batch_idx + 1), 100. * correct / total,
-                            correct, total))
+            print(f" test_loss:{test_loss / batch_idx}  |  accuracy:{100. * correct / total}")
+
         acc = 100. * correct / total
         if epoch == start_epoch + args.epoch - 1 or acc > best_acc:
             checkpoint(acc, epoch)
