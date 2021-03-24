@@ -132,7 +132,6 @@ def train(epoch):
     print('\nEPoch: %d' % epoch)
     net.train()
     train_loss = 0
-    reg_loss = 0
     correct = 0
     total = 0
     for batch_idx, (inputs, targets) in enumerate(trainloader):
@@ -154,9 +153,9 @@ def train(epoch):
         loss.backward()
         optimizer.step()
 
-        print(f" train_loss:{train_loss / batch_idx}  |  accuracy:{ 100. * correct / total}")
+        print(f" train_loss:{train_loss / batch_idx+1}  |  accuracy:{ 100. * correct / total}")
 
-    return (train_loss / batch_idx, reg_loss / batch_idx, 100. * correct / total)
+    return (train_loss / batch_idx, 100. * correct / total)
 
 
 def test(epoch):
@@ -178,7 +177,7 @@ def test(epoch):
             total += targets.size(0)
             correct += predicted.eq(targets.data).cpu().sum()
 
-            print(f" test_loss:{test_loss / batch_idx}  |  accuracy:{100. * correct / total}")
+            print(f" test_loss:{test_loss / batch_idx+1}  |  accuracy:{100. * correct / total}")
 
         acc = 100. * correct / total
         if epoch == start_epoch + args.epoch - 1 or acc > best_acc:
@@ -209,11 +208,11 @@ if not os.path.exists(logname):
                             'test loss', 'test acc'])
 
 for epoch in range(start_epoch, args.epoch):
-    train_loss, reg_loss, train_acc = train(epoch)
+    train_loss, train_acc = train(epoch)
     test_loss, test_acc = test(epoch)
     scheduler.step(train_loss)
     with open(logname, 'a') as logfile:
         logwriter = csv.writer(logfile, delimiter=',')
-        logwriter.writerow([epoch, train_loss, reg_loss, train_acc, test_loss,
+        logwriter.writerow([epoch, train_loss, train_acc, test_loss,
                             test_acc])
 
