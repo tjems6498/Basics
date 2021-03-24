@@ -141,12 +141,12 @@ def test(epoch):
 
 def checkpoint(acc, epoch):
     print('Saving..')
-    state = {
-        'net': net,
-        'acc': acc,
-        'epoch': epoch,
-        'rng_state': torch.get_rng_state()
-    }
+    # state = {
+    #     'net': net,
+    #     'acc': acc,
+    #     'epoch': epoch,
+    #     'rng_state': torch.get_rng_state()
+    # }
     if not os.path.isdir('checkpoint'):
         os.mkdir('checkpoint')
     torch.save(net.state_dict(), './checkpoint/ckpt.t7' + args.name + '_'
