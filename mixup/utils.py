@@ -53,7 +53,7 @@ def mixup_data(x, y, alpha=1.0, use_cuda=True):
 
     else:
         index = torch.randperm(batch_size)
-    pdb.set_trace()
+    # pdb.set_trace()
     mixed_x = lam * x + (1 - lam) * x[index, :]  # 원본 batch image와 섞인 batch image들을 mix
     y_a, y_b = y, y[index]
     return mixed_x, y_a, y_b, lam
