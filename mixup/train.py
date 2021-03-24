@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
-from mixup.mobilenet import MobileNet
+from mobilenet import MobileNet
 
 
 parser = argparse.ArgumentParser(description="Pytorch CIFAR10 Training")
