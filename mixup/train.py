@@ -15,6 +15,7 @@ import torchvision.datasets as datasets
 from mobilenet import MobileNet
 
 
+#
 parser = argparse.ArgumentParser(description="Pytorch CIFAR10 Training")
 parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
 parser.add_argument('--resume', '-r', action='store_true')
