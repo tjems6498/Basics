@@ -13,8 +13,8 @@ def visualize(image):
 
 def plot_examples(images, bboxes=None):
     fig = plt.figure(figsize=(15, 15))
-    columns = 4
-    rows = 5
+    columns = 3
+    rows = 3
 
     for i in range(1, len(images)+1):
         if bboxes is not None:

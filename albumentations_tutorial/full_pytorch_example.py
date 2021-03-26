@@ -70,6 +70,7 @@ for (image, label) in dataloader:
     image = image.squeeze().permute(1,2,0)  # plot_examples 함수를 쓰기위해 batch_size 없애고 차원 변환
     image_list.append(image)
 
+
 print(len(image_list))
 plot_examples(image_list)
 

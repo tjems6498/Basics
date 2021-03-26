@@ -11,7 +11,7 @@ bboxes = [[13, 170, 224, 410]]  # corner
 transform = A.Compose(
     [
         A.Resize(width=1920, height=1080),
-        A.RandomCrop(width=1280, height=720),
+        A.RandomCrop(width=1280, height=1080),
         A.Rotate(limit=40, p=0.9, border_mode=cv2.BORDER_CONSTANT),  # BORDER_CONSTANT : 회전했을때 남은부분 검은색으로
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.1),
@@ -55,6 +55,7 @@ for i in range(15):
 
     if len(augmentations['bboxes']) == 0:  # 위의 조건들에 의해 bbox가 살아남지 못했으면 그땐 저장하지 않음
         continue
+    print(augmentations['bboxes'])
     images_list.append(augmented_img)
     saved_bboxes.append(augmentations['bboxes'][0])  # utils 함수에서 튜플로 받아야 해서 [()] -> () 로 풀어줌
 
