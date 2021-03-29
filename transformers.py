@@ -18,12 +18,14 @@ class SelfAttention(nn.Module):
 
     def forward(self, values, keys, query, mask):
         '''
-        encoder attention   or   decoder attention(not masked attention)
+        주석에 달린 차원 :  encoder self-attention   or   encoder-decoder attention
+        Masked decoder self-attention의 차원은 주석에 달지 않았음
         '''
         N = query.shape[0]  # 2
         value_len, key_len, query_len = values.shape[1], keys.shape[1], query.shape[1]  # 9, 9, 9 or 9, 9, 7
 
         # Split embedding into self.heads pieces
+        # h 개로 구분된 서로다른 value, key, query 쌍을 만들어서 좀더 다양하게 학습되도록 함
         values = values.reshape(N, value_len, self.heads, self.head_dim)  # (2, 9, 8, 64)
         keys = keys.reshape(N, key_len, self.heads, self.head_dim)
         query = query.reshape(N, query_len, self.heads, self.head_dim)  # (2, 9, 8, 64)  or (2, 7, 8, 64)
@@ -40,14 +42,17 @@ class SelfAttention(nn.Module):
         # queries shape: (N, query_len, heads, heads_dim) (2, 9, 8, 64) or (2, 7, 8, 64)
         # keys shape: (N, keys_len, heads, heads_dim) (2, 9, 8, 64)
         # energy shape: (N, heads, query_len, key_len)  query_len : target sentence / key_len : src sentence
-        # (2, 8, 9, 9) or (2, 8, 7, 9)
+        # endoder-decoder attention에 대해서 : decoder의 query(문장)이 encoder의 out key(각각의 단어)와 얼마나 유사한지 알아냄
+        # 즉 '나는 선생님 이다'라는 쿼리에서 '나는' '선생님' '이다' 각각이 'i' 'am' 'a' 'teacher' 에서 어떤 단어와 연관성이 있는지, 즉 가중치를 학습
+        # (2, 8, 9, 9) or (2, 8, 7, 9) : 각각의 헤드(8)에 대해서 query(9 or 7)와 key(9)간의 attention 에너지를 구함
         if mask is not None:
-            energy = energy.masked_fill(mask==0, float("-1e20"))  # mask에 걸리는 값은 아주 작은수로 (softmax에서 사용하기 위해 0을 피함)
+            energy = energy.masked_fill(mask==0, float("-1e20"))  # mask에 걸리는 값은 아주 작은수(-무한)로 (softmax에서 출력이 0에 아주 가까운 값이 됨) -> 특정 단어를 무시하기위해 사용
             # energy = QK
         # softmax(QK/root(512))
         attention = torch.softmax(energy / (self.embed_size ** (1/2)), dim=3)  # src끼리의 attention (2, 8, 9, 9) or (2, 8, 7, 9)
 
-        out = torch.einsum('nhql,nlhd->nqhd', [attention, values]).reshape(N, query_len, self.heads*self.head_dim)
+        # attetion과 실제 value값의 matmul
+        out = torch.einsum('nhql,nlhd->nqhd', [attention, values]).reshape(N, query_len, self.heads*self.head_dim)  # 다시 원래 차원으로 concat
         # attention shape: (N, heads, query_len, key_len) (2, 8, 9, 9) or (2, 8, 7, 9)
         # values shape: (N, value_len, heads, heads_dim) (2, 9, 8, 64)
         # (N, query_len, heads, heads_dim) (2, 9, 8, 64) -> (2, 9, 512) or (2, 7, 8, 64) -> (2, 7, 512)
@@ -145,9 +150,9 @@ class DecoderBlock(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, value, key, src_mask, trg_mask):
-        attention = self.attention(x, x, x, trg_mask)  # (2, 7, 512)
+        attention = self.attention(x, x, x, trg_mask)  # (2, 7, 512)  하삼각행렬 마스크
         query = self.dropout(self.norm(attention + x))  # (2, 7, 512)
-        out = self.transformer_block(value, key, query, src_mask)  # (2, 9, 512),(2, 9, 512),(2, 7, 512), src_mask
+        out = self.transformer_block(value, key, query, src_mask)  # (2, 9, 512),(2, 9, 512),(2, 7, 512), 일반 마스크
         return out
 
 
@@ -237,6 +242,11 @@ class Transformer(nn.Module):
     def make_trg_mask(self, trg):
         N, trg_len = trg.shape
         trg_mask = torch.tril(torch.ones((trg_len, trg_len))).expand(N, 1, trg_len, trg_len)  # tril: 들어온 행렬을 하삼각행렬로 변환
+        '''
+        Masked Decoder Self-Attention에서 하 삼각행렬을 마스크로 사용하는 이유 
+         - 만약 target문장이 '나는 게임을 했다' 일때 '게임을' 이라는 단어는 '나는' 이라는 단어를 참고해도 되지만 
+         '했다' 라는 단어를 참고하면 일종의 cheat로 볼 수 있기 때문이라고 한다.
+        '''
         return trg_mask.to(self.device)
 
     def forward(self, src, trg):
