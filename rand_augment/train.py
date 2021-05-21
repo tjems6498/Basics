@@ -96,8 +96,10 @@ def main():
 
     criterion = SmoothCrossEntropyLoss(0.1)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+        optimizer, T_0=10, T_mult=1, eta_min=0.00001, verbose=True)
     writer = SummaryWriter(f'runs/Rand_Augmentation')
+
 
     for epoch in range(num_epochs):
         print(f"Epoch:{epoch+1}")
