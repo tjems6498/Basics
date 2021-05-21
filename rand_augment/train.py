@@ -111,9 +111,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # parser.add_argument('--workers', type=int, default=8, help='maximum number of dataloader workers')
     parser.add_argument('--batch-size', type=int, default=32, help='total batch size for all GPUs')
+    parser.add_argument('--lr', type=float, default=0.001, help='total batch size for all GPUs')
+
     args = parser.parse_args()
 
-    learning_rate = 0.1
+    learning_rate = args.lr
     batch_size = args.batch_size
     weight_decay = 5e-4
     num_epochs = 200
