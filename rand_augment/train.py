@@ -5,17 +5,10 @@ from data import get_dataloaders
 from smooth_ce import SmoothCrossEntropyLoss
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
+import argparse
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-learning_rate = 0.1
-batch_size = 32
-weight_decay = 5e-4
-num_epochs = 200
-num_classes = 10
-train_step = 0
-val_step = 0
-test_step = 0
 
 def train(trainloader, model, optimizer, criterion, writer, scheduler):
     global train_step
@@ -95,7 +88,8 @@ def test(testloader, model, criterion, writer):
 
 def main():
 
-    trainsampler, trainloader, validloader, testloader = get_dataloaders(batch_size, 'dataset', 0.15)
+
+    trainsampler, trainloader, validloader, testloader = get_dataloaders(batch_size, 'dataset', 0.15, rand_aug=False)
 
     model = WideResNet(10, 2, 0, 10)  # depth, widen_factor, dropout_rate, num_classes
     model.to(device)
@@ -113,8 +107,22 @@ def main():
         if (epoch+1) % 10 == 0:
             test(testloader, model, criterion, writer)
 
-
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    # parser.add_argument('--workers', type=int, default=8, help='maximum number of dataloader workers')
+    parser.add_argument('--batch-size', type=int, default=32, help='total batch size for all GPUs')
+    args = parser.parse_args()
+
+    learning_rate = 0.1
+    batch_size = args.batch_size
+    weight_decay = 5e-4
+    num_epochs = 200
+    num_classes = 10
+    train_step = 0
+    val_step = 0
+    test_step = 0
+
+
     main()
 
 
