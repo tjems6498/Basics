@@ -188,11 +188,11 @@ class RandAugment:
 
     def __call__(self, img):
         ops = random.choices(self.augment_list, k=self.n)
-        org_img = img.copy()
+        # org_img = img.copy()
         for op, minval, maxval in ops:
             val = (float(self.m) / 30) * float(maxval - minval) + minval
-            img_list.append(op(org_img, val))
-            fn_names.append(str(op).split(' ')[1])
+            # img_list.append(op(org_img, val))
+            # fn_names.append(str(op).split(' ')[1])
 
             img = op(img, val)
 

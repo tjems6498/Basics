@@ -89,7 +89,7 @@ def test(testloader, model, criterion, writer):
 def main():
 
 
-    trainsampler, trainloader, validloader, testloader = get_dataloaders(batch_size, 'dataset', 0.15, rand_aug=False)
+    trainsampler, trainloader, validloader, testloader = get_dataloaders(batch_size, 'dataset', 0.15, rand_aug=True)
 
     model = WideResNet(10, 2, 0, 10)  # depth, widen_factor, dropout_rate, num_classes
     model.to(device)
