@@ -40,7 +40,7 @@ def bbox_overlaps_giou(bboxes1, bboxes2):
     outer_area = outer[:, 0] * outer[:, 1]
     union = area1 + area2 - inter_area
     closure = outer_area
-    ious = (inter_area / union) - (closure - union) / closure  # GIou = Iou - (outer - union/outer)
+    ious = (inter_area / union) - (closure - union) / closure  # GIou = Iou - (outer - union/outer)  -1~1
     ious = torch.clamp(ious, min=-1.0, max=1.0)
 
     if exchange:
