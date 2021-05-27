@@ -201,6 +201,7 @@ class RandAugment:
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
+    # from randaugment import RandAugment
 
     def visualize(images, names):
         fig = plt.figure(figsize=(10, 10))
@@ -216,10 +217,15 @@ if __name__ == '__main__':
     img_list = [image]
     fn_names = ['Original']
 
-    ra = RandAugment(3,2)
+    ra = RandAugment(3,4)
     transform_img = ra(image)
     img_list.append(transform_img)
     fn_names.append('All')
+
+    # ra = RandAugment()
+    # img_list.append(ra(image))
+    # fn_names.append('All')
+
 
     visualize(img_list, fn_names)
 
